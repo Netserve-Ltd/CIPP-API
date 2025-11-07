@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # path to your app
 
 jobs:
   deploy:
@@ -28,14 +28,16 @@ jobs:
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
 
-      # Login so Azure CLI can set app settings
+  configure:
+    needs: deploy
+    runs-on: ubuntu-latest            # <<< Linux runner required for azure/cli action
+    steps:
       - name: Azure login (publish profile)
         uses: azure/login@v2
         with:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
 
-      # Add CIPP SuperAdmin + enable roles (Function App)
-      - name: Set CIPP SuperAdmin + enable roles
+      - name: Set CIPP SuperAdmin + enable roles (Function App)
         uses: azure/cli@v2
         with:
           inlineScript: |
@@ -46,3 +48,12 @@ jobs:
             az functionapp restart \
               --name cipphzozq \
               --resource-group cipp
+
+      - name: Verify app settings
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az functionapp config appsettings list \
+              --name cipphzozq \
+              --resource-group cipp \
+              --query "[?name=='SUPERADMINS' || name=='ENABLE_ROLES']"

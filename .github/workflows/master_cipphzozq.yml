@@ -15,29 +15,34 @@ env:
 jobs:
   deploy:
     runs-on: windows-latest
-    
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout GitHub Action
         uses: actions/checkout@v4
-      
-      - name: 'Run Azure Functions Action'
+
+      - name: Run Azure Functions Action
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: 'cipphzozq'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-              # Add CIPP SuperAdmin + enable roles
-    - name: Set CIPP SuperAdmin + enable roles
-      uses: azure/cli@v2
-      with:
-        inlineScript: |
-          az webapp config appsettings set \
-            --name cipphzozq \
-            --resource-group cipp \
-            --settings SUPERADMINS=ash.crompton@netserve.support ENABLE_ROLES=true
-          az webapp restart \
-            --name cipphzozq \
-            --resource-group cipp
-            
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AC7DBB52700345BFB01628026843B37E }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
+
+      # Login so Azure CLI can set app settings
+      - name: Azure login (publish profile)
+        uses: azure/login@v2
+        with:
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
+
+      # Add CIPP SuperAdmin + enable roles (Function App)
+      - name: Set CIPP SuperAdmin + enable roles
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az functionapp config appsettings set \
+              --name cipphzozq \
+              --resource-group cipp \
+              --settings SUPERADMINS=ash.crompton@netserve.support ENABLE_ROLES=true
+            az functionapp restart \
+              --name cipphzozq \
+              --resource-group cipp

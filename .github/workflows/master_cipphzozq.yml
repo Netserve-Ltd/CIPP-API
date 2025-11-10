@@ -1,4 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/functions-action
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy Powershell project to Azure Function App - cipphzozq
@@ -10,56 +10,21 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # path to your app
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
 
 jobs:
   deploy:
     runs-on: windows-latest
+    
     steps:
-      - name: Checkout GitHub Action
+      - name: 'Checkout GitHub Action'
         uses: actions/checkout@v4
-
-      # 🔑 Login to Azure first
-      - name: Azure login (publish profile)
-        uses: Azure/login@v2
-        with:
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
-
-      - name: Run Azure Functions Action
+      
+      - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: 'cipphzozq'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
-
-  configure:
-    needs: deploy
-    runs-on: ubuntu-latest  # Linux runner for Azure CLI
-    steps:
-      - name: Azure login (publish profile)
-        uses: Azure/login@v2
-        with:
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
-
-      - name: Set CIPP SuperAdmin + enable roles (Function App)
-        uses: Azure/cli@v1
-        with:
-          inlineScript: |
-            az functionapp config appsettings set \
-              --name cipphzozq \
-              --resource-group cipp \
-              --settings SUPERADMINS=ash.crompton@netserve.support ENABLE_ROLES=true
-            az functionapp restart \
-              --name cipphzozq \
-              --resource-group cipp
-
-      - name: Verify app settings
-        uses: Azure/cli@v1
-        with:
-          inlineScript: |
-            az functionapp config appsettings list \
-              --name cipphzozq \
-              --resource-group cipp \
-              --query "[?name=='SUPERADMINS' || name=='ENABLE_ROLES']"
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AC7DBB52700345BFB01628026843B37E }}

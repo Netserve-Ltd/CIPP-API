@@ -30,7 +30,7 @@ jobs:
 
   configure:
     needs: deploy
-    runs-on: ubuntu-latest            # <<< Linux runner required for azure/cli action
+    runs-on: ubuntu-latest  # Required for Azure CLI
     steps:
       - name: Azure login (publish profile)
         uses: azure/login@v2
@@ -38,7 +38,7 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_API }}
 
       - name: Set CIPP SuperAdmin + enable roles (Function App)
-        uses: azure/cli@v2
+        uses: azure/cli@v1
         with:
           inlineScript: |
             az functionapp config appsettings set \
@@ -50,7 +50,7 @@ jobs:
               --resource-group cipp
 
       - name: Verify app settings
-        uses: azure/cli@v2
+        uses: azure/cli@v1
         with:
           inlineScript: |
             az functionapp config appsettings list \
